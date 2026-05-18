@@ -83,11 +83,11 @@ function draw() {
   textAlign(CENTER, CENTER);
   
   if (!gameStarted) {
-    textSize(32);
+    textSize(24);
     text("點擊滑鼠或觸控螢幕以開始遊戲", width / 2, height * 0.15);
   } else {
     // 顯示左右兩側計分板
-    textSize(32);
+    textSize(24);
     textAlign(LEFT, TOP);
     text(`玩家分數：${playerScore} / 3`, 20, 20);
     textAlign(RIGHT, TOP);
@@ -101,12 +101,12 @@ function draw() {
 
     if (gameState === 0) {
       // 狀態 0：等待出拳
-      textSize(32);
+      textSize(24);
       text("遊戲進行中！請對著鏡頭出拳", width / 2, height * 0.15);
       
-      textSize(48);
+      textSize(36);
       fill(200);
-      text("偵測中...", width / 2, height * 0.85); // 隱藏具體手勢
+      text("偵測中...", width / 2, height * 0.92); // 隱藏具體手勢並下移
       
       if (currentGesture === "剪刀" || currentGesture === "石頭" || currentGesture === "布") {
         gameState = 1;
@@ -115,19 +115,22 @@ function draw() {
       }
     } else if (gameState === 1) {
       // 狀態 1：倒數 3 秒
-      textSize(32);
+      textSize(24);
       text("請保持手勢不要動...", width / 2, height * 0.15);
       
-      if (currentGesture !== lockedGesture) {
-        // 手勢改變或消失，視為中途更換，退回偵測狀態
+      if (hands.length === 0) {
+        // 手完全移開鏡頭，重置倒數
+        gameState = 0;
+      } else if (currentGesture !== "無法辨識" && currentGesture !== lockedGesture) {
+        // 變換成其他明確的猜拳手勢，才視為中途更換並重置
         gameState = 0;
       } else {
         let elapsed = millis() - countdownStart;
         let remaining = Math.ceil((3000 - elapsed) / 1000);
         
-        textSize(48);
+        textSize(36);
         fill(255, 255, 0);
-        text(`偵測成功！倒數 ${remaining} 秒`, width / 2, height * 0.85);
+        text(`偵測成功！倒數 ${remaining} 秒`, width / 2, height * 0.92); // 下移
         
         if (elapsed >= 3000) {
           // 倒數 3 秒結束，系統隨機產生電腦手勢並結算
@@ -142,11 +145,11 @@ function draw() {
       }
     } else if (gameState === 2) {
       // 狀態 2：顯示單回合結果
-      textSize(40);
+      textSize(28);
       fill(255);
       text(`玩家：${lockedGesture}  VS  電腦：${computerGesture}`, width / 2, height * 0.15);
       
-      textSize(64);
+      textSize(48);
       if (matchResult.includes("玩家")) {
         fill(100, 255, 100);
       } else if (matchResult.includes("電腦")) {
@@ -156,16 +159,16 @@ function draw() {
       }
       text(matchResult, width / 2, height * 0.5);
       
-      textSize(24);
+      textSize(18);
       fill(255);
       if (playerScore >= 3 || computerScore >= 3) {
-        text("點擊滑鼠或觸控螢幕查看結算畫面", width / 2, height * 0.85);
+        text("點擊滑鼠或觸控螢幕查看結算畫面", width / 2, height * 0.92); // 下移
       } else {
-        text("點擊滑鼠或觸控螢幕繼續下一回合", width / 2, height * 0.85);
+        text("點擊滑鼠或觸控螢幕繼續下一回合", width / 2, height * 0.92); // 下移
       }
     } else if (gameState === 3) {
       // 狀態 3：遊戲終局結算畫面
-      textSize(64);
+      textSize(48);
       if (playerScore >= 3) {
         fill(100, 255, 100);
         text("恭喜！你贏得了最終勝利！", width / 2, height * 0.15);
@@ -174,15 +177,15 @@ function draw() {
         text("電腦贏了！再接再厲！", width / 2, height * 0.15);
       }
       
-      textSize(40);
+      textSize(32);
       fill(255);
       text(`最終比分  玩家 ${playerScore} : ${computerScore} 電腦`, width / 2, height * 0.5);
       
       // 更新結算畫面的提示文字
-      textSize(32);
+      textSize(24);
       fill(255, 255, 100); // 黃色文字
-      text("👉 比出「打勾(L)」手勢：繼續比賽", width / 2, height * 0.75);
-      text("🤘 比出「搖滾(Rock)」手勢：結束並返回首頁", width / 2, height * 0.85);
+      text("👉 比出「打勾(L)」手勢：繼續比賽", width / 2, height * 0.82); // 調整間距
+      text("🤘 比出「搖滾(Rock)」手勢：結束並返回首頁", width / 2, height * 0.92); // 調整間距
 
       // 新增：偵測到對應手勢後觸發後續動作
       if (currentGesture === "繼續") {
@@ -209,10 +212,6 @@ function mousePressed() {
     } else {
       gameState = 0; // 繼續下一回合
     }
-  } else if (gameState === 3) {
-    playerScore = 0;
-    computerScore = 0;
-    gameState = 0; // 重新開始新比賽
   }
 }
 
@@ -226,10 +225,6 @@ function touchStarted() {
     } else {
       gameState = 0; // 繼續下一回合
     }
-  } else if (gameState === 3) {
-    playerScore = 0;
-    computerScore = 0;
-    gameState = 0; // 重新開始新比賽
   }
 }
 
